@@ -61,17 +61,54 @@ const conf = {
   afterCalendarRender(e){
     const calendar = this.selectComponent('#calendar').calendar
     const date = calendar.getCurrentYM()
+    // console.log('小程序端', date.year, date.month)
     wx.cloud.callFunction({
       name: 'getStatus',
-      date:{
+      data:{
         year: date.year,
         month: date.month,
       },
-      success: function(res) {
-        console.log('查询结果', res.result) 
-      },
-      fail: console.error
     })
+    .then(res =>{
+      // console.log(res.result)
+      var status = res.result.list
+      console.log(status)
+      for (var i=0;i<status.length;i++){
+        if (status[i].work == true){
+          //console.log(status[i].date.substring(4,6))
+          calendar.setTodos({
+            pos: 'bottom',
+            dotColor: 'blue',
+            // circle: true,
+            showLabelAlways: true,
+            dates:[
+              {
+                year: Number(status[i].date.substring(0,4)),
+                month: Number(status[i].date.substring(4,6)),
+                date: Number(status[i].date.substring(6,8)),
+              }
+            ]
+          })
+        }
+        if(status[i].night == true){
+          calendar.setTodos({
+            pos: 'bottom',
+            dotColor: 'blue',
+            // circle: true,
+            showLabelAlways: true,
+            dates:[
+              {
+                year: status[i].date.substring(0,4),
+                month: status[i].date.substring(4,6),
+                date: status[i].date.substring(6,8),
+                todoText: '夜'
+              }
+            ]
+          })
+        }
+      }
+    })
+    .catch(console.error)
   },
   afterTapDate(e) {
     // console.log('afterTapDate', e.detail)
