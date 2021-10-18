@@ -58,6 +58,21 @@ const conf = {
     ],
     isTap
   },
+  afterCalendarRender(e){
+    const calendar = this.selectComponent('#calendar').calendar
+    const date = calendar.getCurrentYM()
+    wx.cloud.callFunction({
+      name: 'getStatus',
+      date:{
+        year: date.year,
+        month: date.month,
+      },
+      success: function(res) {
+        console.log('查询结果', res.result) 
+      },
+      fail: console.error
+    })
+  },
   afterTapDate(e) {
     // console.log('afterTapDate', e.detail)
     const calendar = this.selectComponent('#calendar').calendar
@@ -96,7 +111,6 @@ const conf = {
             }
           ]
         })
-        //this.showToast('设置成功！')
         break
       case 'work':
         calendar.setTodos({

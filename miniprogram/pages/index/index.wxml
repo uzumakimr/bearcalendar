@@ -4,6 +4,7 @@
   <calendar
     id="calendar"
     config="{{calendarConfig}}"
+    bind:afterCalendarRender="afterCalendarRender"
     bind:whenChangeWeek="whenChangeWeek"
     bind:whenChangeMonth="whenChangeMonth"
     bind:takeoverTap="takeoverTap"
