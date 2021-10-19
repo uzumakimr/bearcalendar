@@ -36,11 +36,6 @@ const conf = {
     },
     statusBtn: [
       {
-        text: '休息',
-        action: 'rest',
-        color: 'pink'
-      },
-      {
         text: '上班',
         action: 'work',
         color: 'red'
@@ -51,12 +46,64 @@ const conf = {
         color: 'blue'
       },
       {
-        text: '重置',
+        text: '删除',
         action: 'reset',
         color: 'black'
       }
     ],
     isTap
+  },
+  whenChangeMonth(e){
+    const calendar = this.selectComponent('#calendar').calendar
+    const date = calendar.getCurrentYM()
+    this.setData({isTap: false})
+    wx.cloud.callFunction({
+      name: 'getStatus',
+      data:{
+        year: date.year,
+        month: date.month,
+      },
+    })
+    .then(res =>{
+      // console.log(res.result)
+      var status = res.result.list
+      console.log(status)
+      for (var i=0;i<status.length;i++){
+        if (status[i].work == true){
+          //console.log(status[i].date.substring(4,6))
+          calendar.setTodos({
+            pos: 'bottom',
+            dotColor: 'blue',
+            // circle: true,
+            showLabelAlways: true,
+            dates:[
+              {
+                year: Number(status[i].date.substring(0,4)),
+                month: Number(status[i].date.substring(4,6)),
+                date: Number(status[i].date.substring(6,8)),
+              }
+            ]
+          })
+        }
+        if(status[i].night == true){
+          calendar.setTodos({
+            pos: 'bottom',
+            dotColor: 'blue',
+            // circle: true,
+            showLabelAlways: true,
+            dates:[
+              {
+                year: status[i].date.substring(0,4),
+                month: status[i].date.substring(4,6),
+                date: status[i].date.substring(6,8),
+                todoText: '夜'
+              }
+            ]
+          })
+        }
+      }
+    })
+    .catch(console.error)
   },
   afterCalendarRender(e){
     const calendar = this.selectComponent('#calendar').calendar
@@ -133,61 +180,120 @@ const conf = {
     const {year, month, date} = calendar.getSelectedDates()[0]
     console.log(year, month, date)
     switch (action) {
-      case 'rest':
-        calendar.setTodos({
-          pos: 'top',
-          // dotColor: 'purple',
-          circle: true,
-          showLabelAlways: true,
-          dates:[
-            {
-              year: year,
-              month: month,
-              date: date,
-              // todoText: '休息'
-            }
-          ]
-        })
-        break
       case 'work':
-        calendar.setTodos({
-          pos: 'bottom',
-          dotColor: 'blue',
-          // circle: true,
-          showLabelAlways: true,
-          dates:[
-            {
-              year: year,
-              month: month,
-              date: date,
-            }
-          ]
+        wx.cloud.callFunction({
+          name: 'putStatus',
+          data:{
+            year: year,
+            month: month,
+            day: date,
+            work: true,
+            night: false
+          },
         })
+        .then(res => {
+          console.log(res)
+          if (res.result.errMsg == 'collection.add:ok'){
+            calendar.setTodos({
+              pos: 'bottom',
+              dotColor: 'blue',
+              // circle: true,
+              showLabelAlways: true,
+              dates:[
+                {
+                  year: year,
+                  month: month,
+                  date: date,
+                }
+              ]              
+            })
+            wx.showToast({
+              title: '设置成功',
+              icon: 'success',
+              duration: 2000
+            })
+          } else {
+            wx.showToast({
+              title: '设置失败',
+              icon: 'error',
+              duration: 2000
+            })
+          }         
+        })        
         break
       case 'night':
-        calendar.setTodos({
-          pos: 'top',
-          dotColor: 'red',
-          // circle: true,
-          showLabelAlways: true,
-          dates:[
-            {
+        wx.cloud.callFunction({
+          name: 'putStatus',
+          data:{
+            year: year,
+            month: month,
+            day: date,
+            work: false,
+            night: true
+          },
+        })
+        .then(res => {
+          console.log(res)
+          if (res.result.errMsg == 'collection.add:ok'){
+            calendar.setTodos({
+              pos: 'bottom',
+              dotColor: 'blue',
+              // circle: true,
+              showLabelAlways: true,
+              dates:[
+                {
+                  year: year,
+                  month: month,
+                  date: date,
+                  todoText: '夜'
+                }
+              ]
+            })
+            wx.showToast({
+              title: '设置成功',
+              icon: 'success',
+              duration: 2000
+            })
+          } else {
+            wx.showToast({
+              title: '设置失败',
+              icon: 'error',
+              duration: 2000
+            })
+          }         
+        })        
+        break
+      case 'reset': 
+        wx.cloud.callFunction({
+          name: 'delStatus',
+          data:{
+            year: year,
+            month: month,
+            day: date
+          },
+        })
+        .then(res => {
+          console.log(res)
+          if (res.result.errMsg == 'collection.remove:ok'){
+            calendar.deleteTodos([{
               year: year,
               month: month,
-              date: date,
-              todoText: '夜'
-            }
-          ]
-        })
+              date: date
+            }])
+            wx.showToast({
+              title: '设置成功',
+              icon: 'success',
+              duration: 2000
+            })
+          } else {
+            wx.showToast({
+              title: '设置失败',
+              icon: 'error',
+              duration: 2000
+            })
+          }         
+        })        
         break
-      case 'reset': {
-        calendar.deleteTodos([{
-          year: year,
-          month: month,
-          date: date
-        }])
-        break
-      }
       default:
         break
     }

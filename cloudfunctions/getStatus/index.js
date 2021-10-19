@@ -8,7 +8,7 @@ const $ = db.command.aggregate
 // 云函数入口函数
 exports.main = async (event, context) => {
   // 获取当月数据
-  console.log('传入云函数的参数', event)
+  console.log('传入get云函数的参数', event)
   dateStr= String(event.year)+ String(event.month)
   console.log('年月', dateStr)
   return db.collection('status')
