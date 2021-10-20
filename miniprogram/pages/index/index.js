@@ -86,6 +86,35 @@ const conf = {
           })
         }
         if(status[i].night == true){
+          calendar.setDateStyle([{
+            year: Number(status[i].date.substring(0,4)),
+            month: Number(status[i].date.substring(4,6)),
+            date: Number(status[i].date.substring(6,8)),
+            class: 'orange-date'
+          }])
+        }
+      }
+    })
+    .catch(console.error)
+  },
+  whenChangeYear(e){
+    const calendar = this.selectComponent('#calendar').calendar
+    const date = calendar.getCurrentYM()
+    this.setData({isTap: false})
+    wx.cloud.callFunction({
+      name: 'getStatus',
+      data:{
+        year: date.year,
+        month: date.month,
+      },
+    })
+    .then(res =>{
+      // console.log(res.result)
+      var status = res.result.list
+      console.log(status)
+      for (var i=0;i<status.length;i++){
+        if (status[i].work == true){
+          //console.log(status[i].date.substring(4,6))
           calendar.setTodos({
             pos: 'bottom',
             dotColor: 'blue',
@@ -93,13 +122,20 @@ const conf = {
             showLabelAlways: true,
             dates:[
               {
-                year: status[i].date.substring(0,4),
-                month: status[i].date.substring(4,6),
-                date: status[i].date.substring(6,8),
-                todoText: '夜'
+                year: Number(status[i].date.substring(0,4)),
+                month: Number(status[i].date.substring(4,6)),
+                date: Number(status[i].date.substring(6,8)),
               }
             ]
           })
+        }
+        if(status[i].night == true){
+          calendar.setDateStyle([{
+            year: Number(status[i].date.substring(0,4)),
+            month: Number(status[i].date.substring(4,6)),
+            date: Number(status[i].date.substring(6,8)),
+            class: 'orange-date'
+          }])
         }
       }
     })
@@ -138,20 +174,12 @@ const conf = {
           })
         }
         if(status[i].night == true){
-          calendar.setTodos({
-            pos: 'bottom',
-            dotColor: 'blue',
-            // circle: true,
-            showLabelAlways: true,
-            dates:[
-              {
-                year: status[i].date.substring(0,4),
-                month: status[i].date.substring(4,6),
-                date: status[i].date.substring(6,8),
-                todoText: '夜'
-              }
-            ]
-          })
+          calendar.setDateStyle([{
+            year: Number(status[i].date.substring(0,4)),
+            month: Number(status[i].date.substring(4,6)),
+            date: Number(status[i].date.substring(6,8)),
+            class: 'orange-date'
+      }])
         }
       }
     })
@@ -188,7 +216,6 @@ const conf = {
             month: month,
             day: date,
             work: true,
-            night: false
           },
         })
         .then(res => {
@@ -228,27 +255,18 @@ const conf = {
             year: year,
             month: month,
             day: date,
-            work: false,
             night: true
           },
         })
         .then(res => {
           console.log(res)
           if (res.result.errMsg == 'collection.add:ok'){
-            calendar.setTodos({
-              pos: 'bottom',
-              dotColor: 'blue',
-              // circle: true,
-              showLabelAlways: true,
-              dates:[
-                {
+            calendar.setDateStyle([{
                   year: year,
                   month: month,
                   date: date,
-                  todoText: '夜'
-                }
-              ]
-            })
+                  class: 'orange-date'
+            }])
             wx.showToast({
               title: '设置成功',
               icon: 'success',
@@ -280,14 +298,20 @@ const conf = {
               month: month,
               date: date
             }])
+            calendar.setDateStyle([{
+              year: year,
+              month: month,
+              date: date,
+              class: ''
+            }])
             wx.showToast({
-              title: '设置成功',
+              title: '删除成功',
               icon: 'success',
               duration: 2000
             })
           } else {
             wx.showToast({
-              title: '设置失败',
+              title: '删除失败',
               icon: 'error',
               duration: 2000
             })
