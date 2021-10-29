@@ -7,45 +7,41 @@ const db = cloud.database()
 // 云函数入口函数
 exports.main = async (event, context) => {
   console.log('传入put云函数的参数', event)
-  date= String(event.year)+String(event.month)+String(event.day)
-  var data = ''
+  // var data = ''
 
   // 查询当天数据
-  db.collection('status').where({
-    date: date
-  })
-  .get().then(res => {
-    data = res.data
-    console.log('数据库查询结果：',data)
-  })
+  // db.collection('status').where({
+  //   year: event.year,
+  //   month: event.month,
+  //   date: event.date
+  // })
+  // .get().then(res => {
+  //   data = res.data
+  //   console.log('数据库查询结果：',data)
+  // })
   
-  // 查看当天工作状态是否有数据
-  if (data.res == null){
+  // 写入数据或更新数据
+  if(event.work == -1){
+    return await db.collection('status').add({
+      // data 字段表示需新增的 JSON 数据
+      data: {
+        year: event.year,
+        month: event.month,
+        date: event.date,
+        night: true,
+        work: true
+      }
+    })
+  }else if (event.night == -1){
     return db.collection('status').add({
       // data 字段表示需新增的 JSON 数据
       data: {
-        date: date,
-        night: event.night,
-        work: event.work
+        year: event.year,
+        month: event.month,
+        date: event.date,
+        night: false,
+        work: false
       }
     })
-  } else if (data[0].night != event.night && data[0].work != event.work){
-    if (data[0].night != event.night){
-      return db.collection('status').doc(data[0]._id).update({
-        // data 字段表示需新增的 JSON 数据
-        data: {
-          night: event.night,
-        }
-      })
-    } else {
-      return db.collection('status').doc(data[0]._id).update({
-        // data 字段表示需新增的 JSON 数据
-        data: {
-          work: event.work,
-        }
-      })
-    }    
-  }
-
-  
-}
+  }    
+}  

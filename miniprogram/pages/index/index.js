@@ -29,67 +29,60 @@ const conf = {
       showLunar: true,
       emphasisWeek: true,
       markToday: '今',
-      inverse: true
+      inverse: true,
       // chooseAreaMode: true
       // defaultDate: '2020-9-8',
       // autoChoosedWhenJump: true
     },
     statusBtn: [
       {
-        text: '上班',
-        action: 'work',
-        color: 'red'
+        text: '休息',
+        action: 'rest',
       },
       {
         text: '夜班',
         action: 'night',
-        color: 'blue'
       },
       {
         text: '删除',
         action: 'reset',
-        color: 'black'
-      }
+      },
     ],
     isTap
   },
   whenChangeMonth(e){
     const calendar = this.selectComponent('#calendar').calendar
-    const date = calendar.getCurrentYM()
-    this.setData({isTap: false})
+    const {year,month} = calendar.getCurrentYM()
     wx.cloud.callFunction({
       name: 'getStatus',
       data:{
-        year: date.year,
-        month: date.month,
+        year: year,
+        month: month,
       },
     })
     .then(res =>{
-      // console.log(res.result)
-      var status = res.result.list
+      var status = res.result.data
       console.log(status)
       for (var i=0;i<status.length;i++){
-        if (status[i].work == true){
-          //console.log(status[i].date.substring(4,6))
+        if (status[i].work == false){
           calendar.setTodos({
             pos: 'bottom',
             dotColor: 'blue',
-            // circle: true,
             showLabelAlways: true,
             dates:[
               {
-                year: Number(status[i].date.substring(0,4)),
-                month: Number(status[i].date.substring(4,6)),
-                date: Number(status[i].date.substring(6,8)),
+                year: status[i].year,
+                month: status[i].month,
+                date: status[i].date,
               }
             ]
           })
         }
         if(status[i].night == true){
           calendar.setDateStyle([{
-            year: Number(status[i].date.substring(0,4)),
-            month: Number(status[i].date.substring(4,6)),
-            date: Number(status[i].date.substring(6,8)),
+            year: status[i].year,
+            month: status[i].month,
+            date: status[i].date,
             class: 'orange-date'
           }])
         }
@@ -99,41 +92,37 @@ const conf = {
   },
   whenChangeYear(e){
     const calendar = this.selectComponent('#calendar').calendar
-    const date = calendar.getCurrentYM()
-    this.setData({isTap: false})
+    const {year,month} = calendar.getCurrentYM()
     wx.cloud.callFunction({
       name: 'getStatus',
       data:{
-        year: date.year,
-        month: date.month,
+        year: year,
+        month: month,
       },
     })
     .then(res =>{
-      // console.log(res.result)
-      var status = res.result.list
+      var status = res.result.data
       console.log(status)
       for (var i=0;i<status.length;i++){
-        if (status[i].work == true){
-          //console.log(status[i].date.substring(4,6))
+        if (status[i].work == false){
           calendar.setTodos({
             pos: 'bottom',
-            dotColor: 'blue',
-            // circle: true,
+            dotColor: 'green',
             showLabelAlways: true,
             dates:[
               {
-                year: Number(status[i].date.substring(0,4)),
-                month: Number(status[i].date.substring(4,6)),
-                date: Number(status[i].date.substring(6,8)),
+                year: status[i].year,
+                month: status[i].month,
+                date: status[i].date,
               }
             ]
           })
         }
         if(status[i].night == true){
           calendar.setDateStyle([{
-            year: Number(status[i].date.substring(0,4)),
-            month: Number(status[i].date.substring(4,6)),
-            date: Number(status[i].date.substring(6,8)),
+            year: status[i].year,
+            month: status[i].month,
+            date: status[i].date,
             class: 'orange-date'
           }])
         }
@@ -143,41 +132,39 @@ const conf = {
   },
   afterCalendarRender(e){
     const calendar = this.selectComponent('#calendar').calendar
-    const date = calendar.getCurrentYM()
-    // console.log('小程序端', date.year, date.month)
+    const {year, month} = calendar.getCurrentYM()
     wx.cloud.callFunction({
       name: 'getStatus',
       data:{
-        year: date.year,
-        month: date.month,
+        year: year,
+        month: month,
       },
     })
-    .then(res =>{
-      // console.log(res.result)
-      var status = res.result.list
+    .then(res =>{    
+      var status = res.result.data
       console.log(status)
       for (var i=0;i<status.length;i++){
-        if (status[i].work == true){
-          //console.log(status[i].date.substring(4,6))
+        // 休息设为todo样式
+        if (status[i].work == false){
           calendar.setTodos({
             pos: 'bottom',
-            dotColor: 'blue',
-            // circle: true,
+            dotColor: 'green',
             showLabelAlways: true,
             dates:[
               {
-                year: Number(status[i].date.substring(0,4)),
-                month: Number(status[i].date.substring(4,6)),
-                date: Number(status[i].date.substring(6,8)),
+                year: status[i].year,
+                month: status[i].month,
+                date: status[i].date,
               }
             ]
           })
         }
+        // 夜班设为特殊日期样式
         if(status[i].night == true){
           calendar.setDateStyle([{
-            year: Number(status[i].date.substring(0,4)),
-            month: Number(status[i].date.substring(4,6)),
-            date: Number(status[i].date.substring(6,8)),
+            year: status[i].year,
+            month: status[i].month,
+            date: status[i].date,
             class: 'orange-date'
       }])
         }
@@ -186,36 +173,31 @@ const conf = {
     .catch(console.error)
   },
   afterTapDate(e) {
-    // console.log('afterTapDate', e.detail)
+    console.log('afterTapDate', e.detail)
     const calendar = this.selectComponent('#calendar').calendar
     if (calendar.getSelectedDates()[0] != null){
       const {year, month, date} = calendar.getSelectedDates()[0]
-      console.log(year, month, date)
       this.setData({isTap:true})
-      // console.log('isTap=', isTap)
     } else {
       this.setData({isTap: false})
-      // console.log(isTap)
     }    
   },
   handleAction(e) {
     const {action} = e.currentTarget.dataset
-    // this.setData({
-    //   rst: []
-    // })
-    console.log(action)
     const calendar = this.selectComponent('#calendar').calendar
+    console.log(calendar.getSelectedDates())
     const {year, month, date} = calendar.getSelectedDates()[0]
-    console.log(year, month, date)
+    // console.log(year, month, date)
     switch (action) {
-      case 'work':
+      case 'rest':
         wx.cloud.callFunction({
           name: 'putStatus',
           data:{
             year: year,
             month: month,
-            day: date,
-            work: true,
+            date: date,
+            work: false,
+            night: -1
           },
         })
         .then(res => {
@@ -223,8 +205,7 @@ const conf = {
           if (res.result.errMsg == 'collection.add:ok'){
             calendar.setTodos({
               pos: 'bottom',
-              dotColor: 'blue',
-              // circle: true,
+              dotColor: 'green',
               showLabelAlways: true,
               dates:[
                 {
@@ -254,8 +235,9 @@ const conf = {
           data:{
             year: year,
             month: month,
-            day: date,
-            night: true
+            date: date,
+            night: true,
+            work: -1
           },
         })
         .then(res => {
@@ -287,7 +269,7 @@ const conf = {
           data:{
             year: year,
             month: month,
-            day: date
+            date: date
           },
         })
         .then(res => {
@@ -318,12 +300,11 @@ const conf = {
           }         
         })        
         break
-      default:
+        default:
         break
     }
   }
 }
-
 Page(conf)
 
 

@@ -8,10 +8,10 @@
 
 .btn {
     border-radius: 50px;
-    font-size: 18px;
+    font-size: 17px;
     background-color: #F18D05;
     color: #fff;
-    height: 50px;
+    height: 45px;
     margin-top: 10px;
     margin-bottom: 10px;
 }

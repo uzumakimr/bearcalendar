@@ -7,9 +7,9 @@ const db = cloud.database()
 // 云函数入口函数
 exports.main = async (event, context) => {
   console.log('传入del云函数的参数', event)
-  date= String(event.year)+String(event.month)+String(event.day)
-  console.log(date) 
   return await db.collection('status').where({
-    date: date
+    date: event.date,
+    month: event.month,
+    year: event.year
   }).remove()
 }

@@ -9,20 +9,9 @@ const $ = db.command.aggregate
 exports.main = async (event, context) => {
   // 获取当月数据
   console.log('传入get云函数的参数', event)
-  dateStr= String(event.year)+ String(event.month)
-  console.log('年月', dateStr)
-  return db.collection('status')
-      .aggregate()
-      .project({
-        _id: 0,
-        month: $.substrBytes(['$date', 0, 6]),
-        date: 1,
-        night: 1,
-        work: 1
+  return db.collection('status').where({
+        year: event.year,
+        month: event.month
       })
-      .match({
-        month: dateStr
-      })
-      .limit(100)
-      .end()
+      .get()
 }
