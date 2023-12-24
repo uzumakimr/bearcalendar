@@ -1,6 +1,6 @@
 // 云函数入口文件
 const cloud = require('wx-server-sdk')
-cloud.init({env: 'cloud1-7ganqb9waf852de0'})
+cloud.init({env: 'calendar-7govvqy164c74a2c'})
 
 const db = cloud.database()
 const $ = db.command.aggregate
